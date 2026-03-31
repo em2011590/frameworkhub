@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import Framework from "@/models/Framework";
+import { STATIC_FRAMEWORKS } from "@/lib/data/staticFrameworks";
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -18,6 +19,14 @@ export async function GET(
     return NextResponse.json(framework);
   } catch (error) {
     console.error("GET /api/frameworks/[slug] error:", error);
+    
+    // Fallback to static frameworks
+    const { slug } = await params;
+    const staticFramework = STATIC_FRAMEWORKS.find(f => f.slug === slug);
+    if (staticFramework) {
+      return NextResponse.json(staticFramework);
+    }
+    
     return NextResponse.json({ error: "Failed to fetch framework" }, { status: 500 });
   }
 }

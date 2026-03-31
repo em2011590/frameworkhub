@@ -81,7 +81,15 @@ export default function FrameworksPage() {
         const res = await fetch("/api/frameworks?limit=100");
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
-        dispatch(setFrameworks(data.frameworks as FrameworkSummary[]));
+        const frameworks = data.frameworks as FrameworkSummary[];
+        
+        // If no frameworks returned, use static fallback
+        if (!frameworks || frameworks.length === 0) {
+          console.warn("No frameworks returned from API, using static fallback");
+          dispatch(setFrameworks(STATIC_FRAMEWORKS));
+        } else {
+          dispatch(setFrameworks(frameworks));
+        }
       } catch (error) {
         console.error("Failed to fetch frameworks:", error);
         // Last resort fallback (if even API fallback fails)
